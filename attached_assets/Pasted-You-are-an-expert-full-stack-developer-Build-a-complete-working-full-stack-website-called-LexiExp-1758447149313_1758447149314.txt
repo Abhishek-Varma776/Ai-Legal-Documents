@@ -1,0 +1,102 @@
+You are an expert full-stack developer. Build a complete working full-stack website called **LexiExplain**, an AI-powered legal document simplifier.
+
+# PROBLEM CONTEXT
+Legal documents such as rental agreements, loan contracts, and terms of service are filled with jargon and hidden clauses. Ordinary users cannot understand them, leading to financial or legal risks. Lawyers are costly, so people need an affordable, private AI-powered first tool to simplify legal documents and highlight risks.
+
+# OBJECTIVE
+Develop a secure, private, and intelligent full-stack web application that allows users to:
+1. Upload legal documents (PDF, DOCX, TXT).
+2. **Step 1: Detect whether the uploaded file is a legal document or not.**
+   - If not legal → show message: “This does not appear to be a legal document. Please upload a valid rental agreement, contract, or terms of service.”
+   - If legal → proceed to analysis.
+3. Extract text and clauses.
+4. Summarize each clause in plain English.
+5. Classify clauses (Termination, Liability, Privacy, Fees, etc.).
+6. Highlight **risk levels** (Low / Medium / High) with justifications.
+7. Provide a Q&A chatbot for user questions about the document.
+8. Export annotated summary or annotated PDF.
+9. Show disclaimer: “This is not legal advice. Consult a lawyer for binding advice.”
+
+# TECH STACK
+- **Frontend**: React + Tailwind CSS (clean, responsive UI).
+- **Backend**: Node.js (Express.js) REST API.
+- **Database**: Firestore (NoSQL) for user metadata, sessions, and clause history.
+- **File Storage**: Google Cloud Storage for uploaded documents.
+- **AI Services**:
+  - Google Document AI → OCR + structured text extraction.
+  - Google Vertex AI Generative Model (Gemini) → summaries, rewrites, Q&A.
+  - Vertex Matching Engine or vector DB → RAG for grounding chatbot answers.
+  - **Document Classifier**: Vertex AI model to classify text as [Legal / Not Legal] before analysis.
+
+# FUNCTIONAL REQUIREMENTS
+## Frontend
+- Homepage with project intro + CTA (“Upload Document”).
+- Upload form (drag & drop + file select).
+- Display results in this order:
+  1. **Step 1:** Show “Legal document check” result (Legal ✅ or Not Legal ❌).
+  2. If Legal → show:
+     - Overall summary (3–5 bullet points).
+     - Clause-by-clause expandable cards:
+       - Original text
+       - Plain-English rewrite
+       - Risk flag with reason
+       - Suggested safer clause (if risky).
+     - Chatbot UI pane for user queries.
+     - Export button → download annotated summary/PDF.
+- If Not Legal → stop pipeline and display helpful message.
+
+## Backend
+- Authentication (Firebase Auth optional).
+- API Endpoints:
+  - `/upload` → upload doc to Cloud Storage + trigger Document AI parsing.
+  - `/classify` → check if the doc is legal (Legal / Not Legal).
+  - `/process` → if Legal → summarize, classify clauses, assign risk.
+  - `/chat` → chat endpoint using RAG (doc chunks + Gemini).
+  - `/export` → return annotated summary/PDF.
+- Business logic:
+  - Store extracted text + clause metadata in Firestore.
+  - Link file metadata to user session.
+  - Delete documents on request for privacy.
+
+# SECURITY
+- All uploads encrypted in transit (HTTPS) + at rest (Cloud KMS).
+- Provide "Delete Document" button for user.
+- Do not log sensitive data.
+- Store only minimal metadata (doc name, size, processing status).
+- Show privacy disclaimer.
+
+# OUTPUT FORMAT
+Generate the **complete source code** in a structured format:
+1. **Frontend (React + Tailwind)**:
+   - Components: `UploadForm.jsx`, `SummaryCard.jsx`, `ClauseCard.jsx`, `Chatbot.jsx`, `ExportButton.jsx`, `LegalCheckCard.jsx`
+   - Pages: `HomePage.jsx`, `UploadPage.jsx`, `ResultsPage.jsx`
+   - Routing: React Router
+2. **Backend (Node.js + Express)**:
+   - `server.js` main entry
+   - Routes: `/upload`, `/classify`, `/process`, `/chat`, `/export`
+   - Middleware: file upload (Multer), auth check, error handling
+   - Google Cloud SDK integration (Document AI, Vertex AI, Storage, Firestore)
+   - Classifier logic → if Not Legal, stop pipeline
+3. **Database schema (Firestore)**:
+   - `users/{userId}`
+   - `documents/{docId}`
+      - metadata
+      - extracted_text
+      - legal_check: true/false
+      - clauses: [{id, type, summary, risk_level, original}]
+4. **Storage**:
+   - Google Cloud Storage bucket: `legal-doc-uploads`
+5. **Configuration**:
+   - `.env` with API keys, Firestore config, Vertex AI keys
+6. **Run instructions**:
+   - `cd frontend && npm install && npm start`
+   - `cd backend && npm install && npm run dev`
+
+# ADDITIONAL REQUIREMENTS
+- Code must include inline comments for clarity.
+- Provide error handling (e.g., if Document AI fails).
+- Provide confidence scores in output.
+- Ensure chatbot always cites clause numbers as sources.
+- Ensure project runs locally with minimal setup.
+
+Deliver a **working full-stack MVP** of LexiExplain that can be deployed on Google Cloud Run (backend) + Firebase Hosting (frontend).

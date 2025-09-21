@@ -1,0 +1,135 @@
+You are an expert full-stack developer. Build a complete working full-stack website called **LexiExplain**, an AI-powered legal document simplifier.
+
+# PROBLEM CONTEXT
+Legal documents (rental agreements, loan contracts, terms of service) are full of jargon and hidden clauses. Users often cannot understand them, leading to financial or legal risks. Lawyers are expensive, so people need a secure, affordable AI-powered first tool to simplify documents and highlight risks.
+
+# OBJECTIVE
+Develop a secure full-stack web app that allows users to:
+1. Upload legal documents (PDF, DOCX, TXT).
+2. Step 1: Detect if the file is a legal document or not.  
+   - If **Not Legal** → show message: “This does not appear to be a legal document.” Stop processing.  
+   - If **Legal** → continue analysis.
+3. Extract text and clauses.
+4. Summarize each clause in plain English.
+5. Classify clauses (Termination, Liability, Privacy, Fees, etc.).
+6. Highlight **risk levels** (Low / Medium / High) with reasons.
+7. Provide a Q&A chatbot for document queries.
+8. Export annotated summary or PDF.
+9. Show disclaimer: “This is not legal advice. Consult a lawyer for binding advice.”
+
+# TECH STACK
+- **Frontend**: React + Tailwind CSS  
+- **Backend**: Node.js (Express.js) REST API  
+- **Database & Auth**: Supabase (Postgres + Auth)  
+- **File Storage**: Supabase Storage (for uploaded documents)  
+- **AI Services**:  
+  - Google Document AI → OCR + text extraction  
+  - Google Vertex AI (Gemini) → summaries, plain-English rewrites, Q&A  
+  - Supabase + embeddings table for RAG (clause retrieval)
+
+# FUNCTIONAL REQUIREMENTS
+## Frontend
+- Homepage → intro + “Upload Document” CTA  
+- Upload page → file drag/drop  
+- Results page → show:  
+  - **Step 1:** Legal/Not Legal check result  
+  - If Legal → display:  
+    - Overall summary  
+    - Clause-by-clause expandable cards:  
+      - Original text  
+      - Plain-English rewrite  
+      - Risk flag + justification  
+      - Suggested safer alternative (if risky)  
+    - Q&A chatbot  
+    - Export summary/PDF  
+- If Not Legal → stop and show message  
+
+## Backend
+- Routes:  
+  - `/upload` → upload to Supabase Storage  
+  - `/classify` → check legal vs non-legal (using Vertex AI classifier)  
+  - `/process` → extract with Document AI, summarize/classify clauses with Gemini  
+  - `/chat` → RAG chatbot (clauses in Supabase embeddings table + Gemini)  
+  - `/export` → return annotated PDF/summary  
+- Supabase integration:  
+  - Use Supabase client to store:  
+    - User metadata  
+    - Documents metadata (`documents` table)  
+    - Clause analysis results (`clauses` table)  
+    - Embeddings for Q&A (`embeddings` table)  
+- Auth: Supabase Auth (email/password or magic link)  
+
+## Supabase Schema (Postgres)
+- **users**  
+  - id (uuid)  
+  - email  
+  - created_at  
+
+- **documents**  
+  - id (uuid)  
+  - user_id (fk → users.id)  
+  - filename  
+  - storage_path  
+  - is_legal (boolean)  
+  - uploaded_at  
+
+- **clauses**  
+  - id (uuid)  
+  - document_id (fk → documents.id)  
+  - clause_text  
+  - summary  
+  - clause_type  
+  - risk_level  
+  - safer_alternative  
+
+- **embeddings**  
+  - id (uuid)  
+  - clause_id (fk → clauses.id)  
+  - vector (vector type)  
+
+## Security
+- User can delete their document + metadata anytime.  
+- Supabase RLS (Row Level Security) → only owner can access their docs.  
+- Backend sanitizes input and validates file type.  
+- All Supabase + AI keys stored in `.env`.  
+
+# OUTPUT FORMAT
+Generate full source code:  
+
+1. **Frontend (React + Tailwind)**  
+   - Components: `UploadForm.jsx`, `LegalCheckCard.jsx`, `SummaryCard.jsx`, `ClauseCard.jsx`, `Chatbot.jsx`, `ExportButton.jsx`  
+   - Pages: `HomePage.jsx`, `UploadPage.jsx`, `ResultsPage.jsx`  
+   - React Router setup  
+   - Supabase client for auth (login/signup UI)  
+
+2. **Backend (Node.js + Express)**  
+   - `server.js` entry  
+   - Routes: `/upload`, `/classify`, `/process`, `/chat`, `/export`  
+   - Middleware: file upload, Supabase client, error handling  
+   - Logic:  
+     - Upload file → Supabase Storage  
+     - Insert metadata → Supabase DB  
+     - Classify document → Legal/Not Legal  
+     - If Legal → run Document AI + Gemini to process clauses  
+     - Store results in Supabase tables  
+     - Embed clauses into `embeddings` for Q&A  
+
+3. **Supabase Config**  
+   - `supabaseClient.js` with URL + API Key from `.env`  
+   - RLS enabled  
+   - SQL migration for schema  
+
+4. **Instructions to Run**  
+   - `cd frontend && npm install && npm start`  
+   - `cd backend && npm install && npm run dev`  
+   - Setup Supabase project, copy `.env` with URL + anon key + service key  
+   - Deploy backend to Google Cloud Run (optional)  
+   - Deploy frontend to Vercel/Netlify (or Supabase Hosting)  
+
+# ADDITIONAL REQUIREMENTS
+- Code must have inline comments.  
+- Backend should return confidence scores.  
+- Chatbot must cite clause numbers.  
+- Must run locally with minimal setup.  
+
+Deliver a **working full-stack MVP** of **LexiExplain** with Supabase as the backend + database + storage.
