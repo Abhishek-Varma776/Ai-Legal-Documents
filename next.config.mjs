@@ -9,10 +9,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Allow all hosts for Replit proxy environment
-  experimental: {
-    allowedHosts: true,
-  },
 }
 
 export default nextConfig
