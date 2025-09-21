@@ -30,45 +30,132 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="py-20 px-4">
-        <div className="container mx-auto text-center max-w-4xl">
-          <Badge variant="secondary" className="mb-4">
-            AI-Powered Legal Analysis
-          </Badge>
-          <h2 className="text-4xl md:text-6xl font-bold text-balance mb-6">
-            Understand Legal Documents in <span className="text-accent">Plain English</span>
-          </h2>
-          <p className="text-xl text-muted-foreground text-balance mb-8 max-w-2xl mx-auto">
-            Upload any legal document and get instant AI-powered summaries, clause-by-clause explanations, risk
-            assessments, and answers to your questions.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="text-lg px-8">
-              <Link href="/upload">
-                <FileText className="mr-2 h-5 w-5" />
-                Upload Document
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent">
-              <Link href="#how-it-works">See How It Works</Link>
-            </Button>
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Image */}
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-2xl">
+                <img 
+                  src="/images/business_professiona_b2cafe03.jpg" 
+                  alt="Professional reviewing legal documents" 
+                  className="w-full h-[500px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-accent/10 rounded-full blur-3xl"></div>
+              <div className="absolute -top-6 -left-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+            </div>
+            
+            {/* Right side - Content */}
+            <div className="space-y-8">
+              <Badge variant="secondary" className="w-fit">
+                AI-Powered Legal Analysis
+              </Badge>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
+                Understand Legal Documents in <span className="text-accent">Plain English</span>
+              </h2>
+              <p className="text-xl text-muted-foreground text-balance">
+                Upload any legal document and get instant AI-powered summaries, clause-by-clause explanations, risk
+                assessments, and answers to your questions.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button asChild size="lg" className="text-lg px-8">
+                  <Link href="/upload">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Upload Document
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent">
+                  <Link href="#how-it-works">See How It Works</Link>
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <Shield className="inline h-4 w-4 mr-1" />
+                Your documents are processed securely and deleted after analysis
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground mt-4">
-            <Shield className="inline h-4 w-4 mr-1" />
-            Your documents are processed securely and deleted after analysis
-          </p>
+        </div>
+      </section>
+
+      {/* AI Technology Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Content */}
+            <div className="space-y-8 lg:order-1">
+              <Badge variant="outline" className="w-fit">
+                Advanced AI Technology
+              </Badge>
+              <h3 className="text-3xl md:text-4xl font-bold">
+                Powered by Cutting-Edge <span className="text-accent">Artificial Intelligence</span>
+              </h3>
+              <p className="text-lg text-muted-foreground">
+                Our AI system uses advanced natural language processing to understand complex legal documents and translate them into plain English that anyone can understand.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-accent/10 p-2 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">99.9% Accuracy</p>
+                    <p className="text-sm text-muted-foreground">Industry-leading document analysis</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="bg-accent/10 p-2 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Lightning Fast</p>
+                    <p className="text-sm text-muted-foreground">Results in under 30 seconds</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - Image */}
+            <div className="relative lg:order-2">
+              <div className="relative overflow-hidden rounded-2xl">
+                <img 
+                  src="/images/ai_technology,_artif_36c0dfdf.jpg" 
+                  alt="AI Technology analyzing documents" 
+                  className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent"></div>
+              </div>
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-accent/20 rounded-full blur-2xl"></div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Problem Statement */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold mb-4">The Problem with Legal Documents</h3>
-            <p className="text-lg text-muted-foreground">
-              Complex legal jargon creates an unfair advantage, leaving ordinary people vulnerable to hidden clauses and
-              unfavorable terms.
-            </p>
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
+            {/* Left side - Image */}
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-2xl">
+                <img 
+                  src="/images/legal_document_analy_7c58811e.jpg" 
+                  alt="Complex legal documents" 
+                  className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              </div>
+            </div>
+            
+            {/* Right side - Content */}
+            <div className="space-y-6">
+              <h3 className="text-3xl font-bold">The Problem with Legal Documents</h3>
+              <p className="text-lg text-muted-foreground">
+                Complex legal jargon creates an unfair advantage, leaving ordinary people vulnerable to hidden clauses and unfavorable terms.
+              </p>
+            </div>
           </div>
+          
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
