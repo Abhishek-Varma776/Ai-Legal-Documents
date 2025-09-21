@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Header } from "@/components/header"
-import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from "lucide-react"
+import { Upload, FileText, AlertCircle, CheckCircle, Loader2, AlertTriangle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface UploadState {
@@ -17,6 +17,8 @@ interface UploadState {
   progress: number
   error: string | null
   success: boolean
+  legalCheckResult: { isLegal: boolean; confidence: number; documentType: string } | null
+  analysisComplete: boolean
 }
 
 export default function UploadPage() {
@@ -27,6 +29,8 @@ export default function UploadPage() {
     progress: 0,
     error: null,
     success: false,
+    legalCheckResult: null,
+    analysisComplete: false,
   })
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,37 +90,80 @@ export default function UploadPage() {
     event.preventDefault()
   }, [])
 
-  const simulateUpload = async () => {
+  const analyzeDocument = async () => {
     if (!uploadState.file) return
 
     setUploadState((prev) => ({ ...prev, uploading: true, progress: 0, error: null }))
 
     try {
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
-        await new Promise((resolve) => setTimeout(resolve, 200))
-        setUploadState((prev) => ({ ...prev, progress: i }))
+      // Step 1: Legal Document Detection
+      setUploadState((prev) => ({ ...prev, progress: 20 }))
+      
+      const formData = new FormData()
+      formData.append("file", uploadState.file)
+
+      // Call the analyze API which includes legal document detection
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Analysis failed")
       }
 
-      // Simulate processing
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      setUploadState((prev) => ({
-        ...prev,
-        uploading: false,
-        success: true,
-        progress: 100,
+      // Step 2: Show Legal Check Result
+      setUploadState((prev) => ({ 
+        ...prev, 
+        progress: 50,
+        legalCheckResult: {
+          isLegal: result.analysis.isLegalDocument,
+          confidence: result.analysis.confidence,
+          documentType: result.analysis.documentType
+        }
       }))
 
-      // Redirect to results page after success
-      setTimeout(() => {
-        router.push("/analysis/demo-document")
-      }, 1500)
+      // Pause to show legal check result - temporarily stop uploading state
+      setUploadState((prev) => ({ ...prev, uploading: false }))
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      if (result.analysis.isLegalDocument) {
+        // Resume uploading state for final analysis
+        setUploadState((prev) => ({ ...prev, uploading: true }))
+        // Step 3: Complete Analysis for Legal Documents
+        setUploadState((prev) => ({ ...prev, progress: 100 }))
+        
+        // Simulate additional processing time
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        setUploadState((prev) => ({
+          ...prev,
+          uploading: false,
+          success: true,
+          analysisComplete: true,
+        }))
+
+        // Redirect to results page after success
+        setTimeout(() => {
+          router.push("/analysis/demo-document")
+        }, 1500)
+      } else {
+        // Document is not legal - stop here
+        setUploadState((prev) => ({
+          ...prev,
+          uploading: false,
+          progress: 100,
+          analysisComplete: true,
+        }))
+      }
+      
     } catch (error) {
       setUploadState((prev) => ({
         ...prev,
         uploading: false,
-        error: "Upload failed. Please try again.",
+        error: error instanceof Error ? error.message : "Analysis failed. Please try again.",
         progress: 0,
       }))
     }
@@ -129,6 +176,8 @@ export default function UploadPage() {
       progress: 0,
       error: null,
       success: false,
+      legalCheckResult: null,
+      analysisComplete: false,
     })
   }
 
@@ -195,17 +244,70 @@ export default function UploadPage() {
                     </div>
 
                     {uploadState.uploading && (
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between text-sm">
-                          <span>Processing document...</span>
+                          <span>
+                            {uploadState.progress < 50 ? "Checking if document is legal..." : 
+                             uploadState.progress < 100 ? "Analyzing legal document..." : 
+                             "Processing complete..."}
+                          </span>
                           <span>{uploadState.progress}%</span>
                         </div>
                         <Progress value={uploadState.progress} className="w-full" />
                       </div>
                     )}
 
-                    {!uploadState.uploading && (
-                      <Button onClick={simulateUpload} className="w-full" size="lg">
+                    {/* Legal Check Result */}
+                    {uploadState.legalCheckResult && !uploadState.uploading && (
+                      <div className="space-y-4">
+                        <Card className={uploadState.legalCheckResult.isLegal ? "border-green-200 bg-green-50" : "border-orange-200 bg-orange-50"}>
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center space-x-2">
+                              {uploadState.legalCheckResult.isLegal ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                              )}
+                              <CardTitle className="text-lg">
+                                {uploadState.legalCheckResult.isLegal ? "✅ Legal Document Detected" : "❌ Not a Legal Document"}
+                              </CardTitle>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            {uploadState.legalCheckResult.isLegal ? (
+                              <div className="space-y-2">
+                                <p className="text-green-800">
+                                  Great! This appears to be a <strong>{uploadState.legalCheckResult.documentType}</strong> with {Math.round(uploadState.legalCheckResult.confidence)}% confidence.
+                                </p>
+                                <p className="text-sm text-green-700">
+                                  Lexora will now analyze all clauses and provide plain-English summaries with risk assessments.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <p className="text-orange-800 font-medium">
+                                  This does not appear to be a legal document. Please upload a valid rental agreement, contract, or terms of service.
+                                </p>
+                                <p className="text-sm text-orange-700">
+                                  Lexora works best with legal documents like contracts, agreements, terms of service, privacy policies, and similar legal texts.
+                                </p>
+                                <Button 
+                                  onClick={resetUpload} 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="mt-3 border-orange-300 text-orange-700 hover:bg-orange-100"
+                                >
+                                  Try Another Document
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {!uploadState.uploading && !uploadState.legalCheckResult && (
+                      <Button onClick={analyzeDocument} className="w-full" size="lg">
                         <FileText className="mr-2 h-5 w-5" />
                         Analyze Document
                       </Button>

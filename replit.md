@@ -1,7 +1,7 @@
-# LexiExplain AI Legal Document Analyzer
+# Lexora AI Legal Document Analyzer
 
 ## Project Overview
-LexiExplain is an AI-powered legal document analysis tool that simplifies complex legal documents by providing:
+Lexora is an AI-powered legal document analysis tool that simplifies complex legal documents by providing:
 - Plain English summaries
 - Clause-by-clause analysis
 - Risk assessment

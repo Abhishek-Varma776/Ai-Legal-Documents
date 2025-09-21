@@ -256,7 +256,7 @@ export default function HomePage() {
       <section id="how-it-works" className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold mb-4">How LexiExplain Works</h3>
+            <h3 className="text-3xl font-bold mb-4">How Lexora Works</h3>
             <p className="text-lg text-muted-foreground">
               Simple, secure, and fast - get insights into your legal documents in minutes.
             </p>
@@ -297,7 +297,7 @@ export default function HomePage() {
           <Shield className="h-16 w-16 text-accent mx-auto mb-6" />
           <h3 className="text-3xl font-bold mb-4">Your Privacy is Our Priority</h3>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            We understand legal documents contain sensitive information. That's why we've built LexiExplain with
+            We understand legal documents contain sensitive information. That's why we've built Lexora with
             security and privacy at its core.
           </p>
           <div className="grid md:grid-cols-2 gap-8 text-left">
@@ -336,7 +336,7 @@ export default function HomePage() {
         <div className="container mx-auto max-w-4xl text-center">
           <h3 className="text-3xl font-bold mb-4">Ready to Understand Your Legal Documents?</h3>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of users who trust LexiExplain to simplify their legal documents.
+            Join thousands of users who trust Lexora to simplify their legal documents.
           </p>
           <Button asChild size="lg" variant="secondary" className="text-lg px-8">
             <Link href="/upload">

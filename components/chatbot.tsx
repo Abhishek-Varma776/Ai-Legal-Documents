@@ -156,7 +156,7 @@ export function Chatbot({ documentId }: ChatbotProps) {
                       </div>
                       <div className="flex-1">
                         <Badge variant="outline" className="text-xs mb-1">
-                          LexiExplain
+                          Lexora
                         </Badge>
                         {message.response ? (
                           <p className="text-sm bg-card p-2 rounded-lg border leading-relaxed">{message.response}</p>
