@@ -7,7 +7,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "LexiExplain - AI Legal Document Simplifier",
+  title: "Lexora - AI Legal Document Simplifier",
   description:
     "Simplify complex legal documents with AI-powered analysis, plain-English summaries, and risk assessment.",
   generator: "v0.app",

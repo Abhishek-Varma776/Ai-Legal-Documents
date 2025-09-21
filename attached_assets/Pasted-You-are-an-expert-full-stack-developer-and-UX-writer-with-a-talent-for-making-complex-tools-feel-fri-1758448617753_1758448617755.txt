@@ -1,0 +1,126 @@
+You are an expert full-stack developer and UX writer with a talent for making complex tools feel friendly and trustworthy. Build a complete working full-stack website called **Lexora** — an AI-powered, lovable legal document simplifier that helps people understand contracts in plain English.
+
+Goal (short)
+Create a deployable full-stack MVP (frontend + backend + Supabase) that:
+1. Lets users upload PDF/DOCX/TXT
+2. First checks whether the uploaded file is a legal document (Legal / Not Legal)
+   - If Not Legal → show a warm, helpful message and stop processing
+   - If Legal → run full analysis pipeline
+3. Extracts text & clauses (Document AI OCR)
+4. Summarizes each clause in plain English
+5. Classifies clause types (Termination, Liability, Fees, Privacy, etc.)
+6. Assigns risk levels (Low / Medium / High) with short reasons
+7. Provides a RAG-grounded chatbot (user can ask about clauses) that always cites clause IDs
+8. Stores metadata, clause results, and embeddings in Supabase tables
+9. Allows export of annotated PDF / summary and secure deletion
+10. Presents a warm, lovable UI and clear legal disclaimers: “Not legal advice — consult a licensed attorney.”
+
+Tone & UX
+- Design microcopy to be friendly and reassuring (e.g., “Lexora is here to help — not replace a lawyer.”)
+- Use a warm color palette, soft rounded UI, and approachable CTAs (e.g., “Upload a contract”, “Explain it, Lexora!”).
+- Provide subtle mascot/emoji or friendly illustration suggestions in comments.
+- Provide onboarding helper text and error messages written plainly.
+
+Tech Stack & Services
+- Frontend: React (create-react-app or Vite) + Tailwind CSS + React Router
+- Backend: Node.js + Express
+- Database & Auth & Storage: Supabase (Postgres, Auth, Storage)
+- AI: Google Document AI for OCR/structure extraction, Google Vertex AI / Gemini for summarization / classification / Q&A
+- Embeddings & RAG: store clause embeddings in a Supabase table (vector column) and use vector nearest-neighbor queries for retrieval; if Supabase vector search is unavailable, include instructions for a simple fallback nearest-neighbor in Node.
+- Hosting: frontend deployable to Vercel/Netlify/Firebase Hosting; backend deployable to Google Cloud Run.
+
+Functional Requirements — Frontend
+- Pages & components:
+  - `HomePage.jsx` — product intro, benefits, and CTA
+  - `UploadPage.jsx` — drag/drop + select file upload, file type validation, progress UI
+  - `ResultsPage.jsx` — displays Legal Check result up top (Legal ✅ or Not Legal ❌). If Legal:
+    - Overall 3–5 bullet summary
+    - Clause list with expandable `ClauseCard`:
+      - Original clause (collapsed by default)
+      - Plain-English rewrite (2–3 sentences)
+      - Risk flag (Low/Medium/High) with one-line reason and confidence %
+      - Suggested safer alternative phrasing (if applicable)
+      - Clause ID shown (e.g., Clause #5) for citation by chatbot
+    - Chatbot panel (`Chatbot.jsx`) to ask questions; responses must include `Sources: clause #n` lines
+    - Export button: annotated PDF and downloadable text summary
+  - `Account` / `Login` optional but include Supabase Auth integration sample (email/magic link)
+  - `LegalCheckCard.jsx` — shows classifier result and confidence score; if Not Legal, friendly guidance to upload a relevant document
+- UI details:
+  - Use Tailwind for responsive layout and accessible components
+  - Show processing states and clear errors
+  - Include "Delete Document" action that removes file from Supabase Storage and related DB rows
+  - Include small “confidence” badges for AI outputs
+
+Functional Requirements — Backend
+- Use Express to create a REST API with these routes:
+  - `POST /upload` — accepts file, authenticates user (optional), stores in Supabase Storage, returns docId and storage path
+  - `POST /classify` — loads doc text (or calls Document AI), runs a Vertex AI classifier to return `{ is_legal: boolean, confidence: number }`
+  - `POST /process` — if `is_legal` is true:
+    - Call Document AI to extract text and segment into clauses
+    - For each clause: call Vertex AI to generate plain-English rewrite, clause type, risk level, suggested alternative, and confidence score
+    - Compute embeddings for each clause and store in `embeddings` table
+    - Store clause records and overall document metadata in Supabase
+    - Return structured JSON to frontend
+  - `POST /chat` — accepts user message + docId, retrieves top-k clause embeddings from Supabase, calls Vertex AI with retrieved clauses as context (RAG), returns answer plus `sources: clause #n` list and confidence
+  - `GET /export/:docId` — returns annotated PDF (HTML-to-PDF rendering of Results) or JSON summary
+  - `DELETE /document/:docId` — deletes storage object and DB rows
+- Backend must use the Supabase JS client (or pg client) to insert/select rows and respect Row-Level Security (RLS) logic
+- Include robust error handling and logging (no PII in logs)
+
+Supabase Schema (provide SQL migrations)
+- `users` (managed by Supabase Auth)
+- `documents`:
+  - `id uuid primary key`
+  - `user_id uuid references auth.users (if using auth)`
+  - `filename text`
+  - `storage_path text`
+  - `is_legal boolean`
+  - `legal_confidence numeric`
+  - `summary text`
+  - `created_at timestamp`
+- `clauses`:
+  - `id uuid primary key`
+  - `document_id uuid references documents.id`
+  - `clause_index integer`
+  - `clause_text text`
+  - `summary text`
+  - `clause_type text`
+  - `risk_level text`
+  - `risk_confidence numeric`
+  - `safer_alternative text`
+  - `created_at timestamp`
+- `embeddings`:
+  - `id uuid primary key`
+  - `clause_id uuid references clauses.id`
+  - `vector vector` (or json/float8[] fallback)
+  - `created_at timestamp`
+
+Security & Privacy
+- Use Supabase RLS policies so only owners can read/write their `documents` and `clauses`
+- Store secrets in a `.env` file (EXPLAIN in comments): `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ANON_KEY`, `GCP_PROJECT_ID`, `GCP_DOCUMENT_AI_KEY`, `VERTEX_API_KEY`, etc.
+- All uploads over HTTPS; encrypt at rest using Supabase/GCP default
+- Provide “Delete Document” button to immediately remove data
+- Provide an explicit “Not legal advice” disclaimer in the UI
+
+AI Prompts & Safety
+- **Legal Check prompt**: "Given the document text below, reply with `LEGAL` or `NOT_LEGAL` and a confidence score 0–1. Consider documents that contain contractual language, parties, dates, obligations, termination, fees, liability, or similar legal constructs to be LEGAL."
+- **Clause summary prompt**: "You are a concise legal plain-language assistant. Given this clause text, rewrite it in simple English (2–3 sentences), list the obligations, and at the end provide `Risk: Low/Medium/High` with a short justification and a confidence score 0–1. Do not invent facts. If unsure, say 'Unsure—ask a lawyer'."
+- **Chat / RAG prompt**: "You are Lexora, a legal-document explainer. Use ONLY the following clause texts (labeled by number) to answer the user question. Provide a short answer, and then include `Sources: clause #n` for each clause you used. If uncertain, answer 'I am not sure — consult a lawyer.'"
+
+Developer Deliverables
+- Full frontend source (React + Tailwind) with all components and pages
+- Full backend source (Node + Express) with above routes and Supabase integration
+- SQL migration file(s) for Supabase schema and RLS policy examples
+- Example `.env.example` with placeholder keys and instructions
+- README with setup instructions:
+  - Setup Supabase project, run SQL migrations, configure storage bucket
+  - Add keys to `.env`
+  - `cd backend && npm install && npm run dev`
+  - `cd frontend && npm install && npm start`
+- Inline comments explaining logic & where to plug GCP / Vertex AI keys
+- Fallback behavior if Document AI or Vertex API fails
+- Minimal unit test examples
+- Friendly empty states, onboarding, and microcopy
+
+Final instruction
+Produce a complete Git-style project structure (file tree + code) for **Lexora**, warm and lovable, ready to run locally and deploy.

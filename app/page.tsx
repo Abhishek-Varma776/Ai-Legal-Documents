@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Shield className="h-8 w-8 text-accent" />
-            <h1 className="text-2xl font-bold text-foreground">LexiExplain</h1>
+            <h1 className="text-2xl font-bold text-foreground">Lexora</h1>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -354,7 +354,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <Shield className="h-6 w-6 text-accent" />
-                <span className="text-lg font-bold">LexiExplain</span>
+                <span className="text-lg font-bold">Lexora</span>
               </div>
               <p className="text-muted-foreground text-sm">AI-powered legal document simplification for everyone.</p>
             </div>
@@ -417,9 +417,9 @@ export default function HomePage() {
           <div className="border-t border-border mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
               <strong>Legal Disclaimer:</strong> This is not legal advice. Consult a lawyer for binding advice.
-              LexiExplain is an AI-powered tool for informational purposes only.
+              Lexora is an AI-powered tool for informational purposes only.
             </p>
-            <p className="text-sm text-muted-foreground mt-2">© 2024 LexiExplain. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground mt-2">© 2024 Lexora. All rights reserved.</p>
           </div>
         </div>
       </footer>
